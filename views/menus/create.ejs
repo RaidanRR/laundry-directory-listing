@@ -1,0 +1,57 @@
+<% layout('layouts/app') %>
+
+    <h1 class="text-center">Add Menu</h1>
+    <div class="col-6 offset-3">
+        <form action="/menus" method="POST" class="validated-form" novalidate>
+            <div class="mb-3">
+                <label for="judul" class="form-label">Judul</label>
+                <input type="text" name="menu[judul]" id="judul" class="form-control" required>
+                <div class="valid-feedback">
+                    ok
+                </div>
+                <div class="invalid-feedback">
+                    mohon diisi
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="harga" class="form-label">Harga</label>
+                <input type="text" name="menu[harga]" id="harga" class="form-control" required>
+                <div class="valid-feedback">
+                    ok
+                </div>
+                <div class="invalid-feedback">
+                    mohon diisi
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="waktu" class="form-label">Waktu</label>
+                <input type="text" name="menu[waktu]" id="waktu" class="form-control" required>
+                <div class="valid-feedback">
+                    ok
+                </div>
+                <div class="invalid-feedback">
+                    mohon diisi
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="keterangan" class="form-label">Keterangan</label>
+                <input type="text" name="menu[keterangan]" id="keterangan" class="form-control" required>
+                <div class="valid-feedback">
+                    ok
+                </div>
+                <div class="invalid-feedback">
+                    mohon diisi
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Foto Url</label>
+                <input type="text" name="menu[image]" id="image" class="form-control" required>
+                <div class="invalid-feedback">
+                    mohon diisi
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success">Save</button>
+        </form>
+    </div>
+    

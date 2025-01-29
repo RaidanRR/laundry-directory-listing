@@ -1,0 +1,25 @@
+<% layout('layouts/app') %>
+    <h1>All Menu</h1>
+    <!-- <a href="/menus/create">Add Menu</a> -->
+    <ul>
+        <% for(const menu of menus) {%>
+            <!-- <li><a href="/menus/<%= menu._id %>"><%= menu.judul %></a></li> -->
+            <div class="card mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="<%= menu.image %>" alt="<%= menu.judul %>" class="img-fluid">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-judul"> <%= menu.judul %></h5>
+                            <p class="card-text"><%= menu.waktu %></p>
+                            <p class="card-text">
+                                <small class="text-secondary"><%= menu.keterangan %></small>
+                            </p>
+                            <a href="/menus/<%= menu._id %>" class="btn btn-primary">View <%= menu.judul %></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %> 
+    </ul>
