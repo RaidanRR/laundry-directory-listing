@@ -1,22 +1,15 @@
-//npm i express mongoose ejs ejs-mate method-override joi
+//npm init -y | npm i express mongoose ejs ejs-mate method-override joi express-session connect-flash
 const express = require('express');
-const ErrorHandler = require('./utils/ErrorHandler');
-const Joi = require('joi');
 const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
-const wrapAsync = require('./utils/wrapAsync');
 const mongoose = require('mongoose');
 const path = require('path');
+const session = require('express-session');
+const flash = require('connect-flash');
+const ErrorHandler = require('./utils/ErrorHandler');
 const app = express();
 
-//models
-const Menu = require('./models/menu');
-const Review = require('./models/review');
-//schemas
-const { menuSchema } = require('./schemas/menu');
-const { reviewSchema } = require('./schemas/review');
-
-
+//connect to mongoose using in cmd: mongod --dbpath="c:\data\db"  using mongosh in cmd: mongosh  and then in cmd: show databases and then in cmd: use bestpoints and then in cmd: db.places.find()
 mongoose.connect('mongodb://127.0.0.1/rancaklaundry')
 .then((result) => {
     console.log('connected to mongodb')
@@ -31,82 +24,30 @@ app.set('views', path.join(__dirname, 'views'));
 //middleware
 app.use(express.urlencoded({ extended: true}));
 app.use(methodOverride('_method'));
-
-const validateMenu = (req, res, next) => {
-    const { error } = menuSchema.validate(req.body);
-    if(error){
-        const msg = error.details.map(el => el.message).join(',');
-        return next(new ErrorHandler(msg, 400));
-    } else {
-        next();
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'secret-unknow-region-uy2g5ghdtu43435gv4g243',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 *7,
     }
-}
-
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if(error){
-        const msg = error.details.map(el => el.message).join(',');
-        return next(new ErrorHandler(msg, 400));
-    } else {
-        next();
-    }
-}
+}));
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    next();
+});
 
 app.get('/', (req, res) =>{
     res.render('home');
 });
 
-app.get('/menus', wrapAsync(async (req, res) => {
-    const menus = await Menu.find();
-    res.render('menus/index', { menus });
-}));
-
-app.get('/menus/create', (req, res) => {
-    res.render('menus/create');
-});
-
-app.post('/menus', validateMenu, wrapAsync(async (req, res, next) => {
-        const menu = new Menu(req.body.menu);
-        await menu.save();
-        res.redirect('/menus');
-}));
-
-
-app.get('/menus/:id', wrapAsync(async (req, res) => {
-    const menu = await Menu.findById(req.params.id).populate('reviews');
-    res.render('menus/show', { menu });
-}));
-
-app.get('/menus/:id/edit', wrapAsync(async (req, res) => {
-    const menu = await Menu.findById(req.params.id);
-    res.render('menus/edit', { menu });
-}));
-
-app.put('/menus/:id', validateMenu, wrapAsync(async (req, res) => {
-    const menu = await Menu.findByIdAndUpdate(req.params.id, { ...req.body.menu});
-    res.redirect('/menus');
-}));
-
-app.delete('/menus/:id', wrapAsync(async (req, res) => {
-    const menu = await Menu.findByIdAndDelete(req.params.id);
-    res.redirect('/menus');
-}));
-
-app.post('/menus/:id/reviews', validateReview, wrapAsync(async (req, res) => {
-    const review = new Review(req.body.review);
-    const menu = await Menu.findById(req.params.id);
-    menu.reviews.push(review);
-    await review.save();
-    await menu.save();
-    res.redirect(`/menus/${req.params.id}`);
-}));
-
-app.delete('/menus/:menu_id/reviews/:review_id', wrapAsync(async (req, res) => {
-    const { menu_id, review_id } = req.params;
-    await Menu.findByIdAndUpdate(req.params.menu_id, { $pull: { reviews: review_id}});
-    await Review.findByIdAndDelete(review_id);
-    res.redirect(`/menus/${menu_id}`);
-}));
+app.use('/menus', require('./routes/menus'));
+app.use('/menus/:menu_id/reviews', require('./routes/reviews'));
 
 app.all('*', (req, res, next) => {
     next(new ErrorHandler('Page not found', 404));
